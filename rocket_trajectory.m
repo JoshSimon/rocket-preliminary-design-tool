@@ -69,28 +69,30 @@ Rho=zeros(1, Memory_Allocation);
 C = 0.4;                                % Drag coefficient
 Gravity = 9.81;                         % Gravity (m/s^2)
 
+% Mass_Structure = 0.05 * Mass_Start;     % Mass of the strucutre and the motors (kg)
+Mass_Flow_One = 300                    % Propulsion mass flow of the first stage (kg/s)
+Mass_Flow_Two = 20                      % Propulsion mass flow of the second stage (kg/s)
+Thrust_One = 29898                     % Sum of thrust of the first stage ( (kg*m)/s^2 )
+Thrust_Two = 38027.5                       % Sum of thrust of the second stage ( (kg*m)/s^2 )
+Mass_Payload = 300 
+
 % Rocket parameters
 r = 1.5                                 % Rocket fuselage radius (m)
 A = 2*pi*r^2;                           % Rocket projected attack area (m^2)
 Launch_Rod_Length = 1;                  % Length of launch rod (m)
-Mass_Motor_And_Strucutre_One =  2000;                 % Mass of the first stage rocket motor (kg)
-Mass_Motor_And_Structure_Two = 500;                   % Mass of the second stage rocket motor (kg)
-Mass_Start = 2800;                    % Start mass of the rocket (kg)
-Mass_Fuel_One = 3000000;                   % Fuel mass of the first stage (kg)
-Mass_Fuel_Two = 40000000;                   % Fuel mass of the second stage (kg)
-Mass_Structure = 0.05 * Mass_Start;     % Mass of the strucutre and the motors (kg)
-Mass_Flow_One = 2000                     % Propulsion mass flow of the first stage (kg/s)
-Mass_Flow_Two = 20                      % Propulsion mass flow of the second stage (kg/s)
-Thrust_One = 2800000                     % Sum of thrust of the first stage ( (kg*m)/s^2 )
-Thrust_Two = 2800                       % Sum of thrust of the second stage ( (kg*m)/s^2 )
-
+Mass_Motor_And_Strucutre_One = 999 ;                 % Mass of the first stage rocket motor (kg)
+Mass_Motor_And_Structure_Two = 1151;                   % Mass of the second stage rocket motor (kg)
+Mass_Start = 19301;                    % Start mass of the rocket (kg)
+Mass_Fuel_One = 17001;                   % Fuel mass of the first stage (kg)
+Mass_Fuel_Two = 1201;                   % Fuel mass of the second stage (kg)
+                   % Mass of Payload (kg)
 % Maneuver parameters
 Theta(1) = 89;                  % Initial angle (deg)
 DeltaTheta = 0.001;              % Flying angle (deg/s)
-Height_Start_Gravity_Turn = 80000 % Height when the vertical flight is stopped and the rocket is tilted for the gravity turn maneuver (m)
+Height_Start_Gravity_Turn = 8000 % Height when the vertical flight is stopped and the rocket is tilted for the gravity turn maneuver (m)
 Eject_One = false;       
 Eject_Two = false;
-Rocket_Tips = false;
+% Rocket_Tips = false;
 
 
 % Inital parameters
@@ -129,11 +131,12 @@ while y(n) > 0 && n < Memory_Allocation                  % Run until rocket hits
      case 1 % start phase, stage 1
         Thrust(n) = Thrust_One;
         Mass(n) = Mass_Start -  Mass_Flow_One * t(n);
+        disp(Mass(n));
         if Mass(n) <= ( Mass(n) - Mass_Fuel_One )
           Eject_One = true;
         endif
-        if Mass(n) <= 0
-            Mass(n) = 0;
+        if Mass(n) <= Mass_Payload
+            Mass(n) = Mass_Payload;
             stage = 'abort';
         endif
      
@@ -143,8 +146,8 @@ while y(n) > 0 && n < Memory_Allocation                  % Run until rocket hits
           if Mass(n) <= ( Mass(n) - Mass_Fuel_One )
             Eject_Two = true;
           endif
-          if Mass(n) <= 0
-            Mass(n) = 0;
+          if Mass(n) <= Mass_Payload
+            Mass(n) = Mass_Payload;
             stage = 'abort';
           endif
      
