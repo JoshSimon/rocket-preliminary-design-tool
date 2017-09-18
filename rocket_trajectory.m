@@ -41,8 +41,8 @@
 clear, clc      % Clear command window and workspace
 
 % Simulation parameters
-Delta = 0.1;                  % Time step 
-Memory_Allocation = 10000;    % Maximum number of time steps expected
+Delta = 0.01;                  % Time step 
+Memory_Allocation = 1000000;    % Maximum number of time steps expected
 
 % Preallocate memory for arrays
 t = zeros(1, Memory_Allocation);
@@ -75,14 +75,14 @@ A = 2*pi*r^2;                           % Rocket projected attack area (m^2)
 Launch_Rod_Length = 1;                  % Length of launch rod (m)
 Mass_Motor_And_Strucutre_One =  2000;                 % Mass of the first stage rocket motor (kg)
 Mass_Motor_And_Structure_Two = 500;                   % Mass of the second stage rocket motor (kg)
-Mass_Start = 280000;                    % Start mass of the rocket (kg)
-Mass_Fuel_One = 3000;                   % Fuel mass of the first stage (kg)
-Mass_Fuel_Two = 4000;                   % Fuel mass of the second stage (kg)
+Mass_Start = 2800;                    % Start mass of the rocket (kg)
+Mass_Fuel_One = 3000000;                   % Fuel mass of the first stage (kg)
+Mass_Fuel_Two = 40000000;                   % Fuel mass of the second stage (kg)
 Mass_Structure = 0.05 * Mass_Start;     % Mass of the strucutre and the motors (kg)
-Mass_Flow_One = 200                     % Propulsion mass flow of the first stage (kg/s)
+Mass_Flow_One = 2000                     % Propulsion mass flow of the first stage (kg/s)
 Mass_Flow_Two = 20                      % Propulsion mass flow of the second stage (kg/s)
-Thrust_One = 280000                     % Sum of thrust of the first stage ( (kg*m)/s^2 )
-Thrust_Two = 280                        % Sum of thrust of the second stage ( (kg*m)/s^2 )
+Thrust_One = 2800000                     % Sum of thrust of the first stage ( (kg*m)/s^2 )
+Thrust_Two = 2800                       % Sum of thrust of the second stage ( (kg*m)/s^2 )
 
 % Maneuver parameters
 Theta(1) = 89;                  % Initial angle (deg)
@@ -90,6 +90,8 @@ DeltaTheta = 0.001;              % Flying angle (deg/s)
 Height_Start_Gravity_Turn = 80000 % Height when the vertical flight is stopped and the rocket is tilted for the gravity turn maneuver (m)
 Eject_One = false;       
 Eject_Two = false;
+Rocket_Tips = false;
+
 
 % Inital parameters
 Vx(1) = 0;                      % Initial horizontal speed (m/s)
@@ -176,9 +178,7 @@ while y(n) > 0 && n < Memory_Allocation                  % Run until rocket hits
      
     
     % Air pressure
-    Rho(n) = 2; 
-    disp([Distance_x(n), isa(Distance_x(n),"P")]);
-   
+    Rho(n) = isa(Distance_x(n),"R");   
     
     % Rocket angle calculation
     Theta(n)= atand(Vy(n)/Vx(n));      % Angle defined by velocity vector
@@ -187,3 +187,67 @@ while y(n) > 0 && n < Memory_Allocation                  % Run until rocket hits
     endif
     
 end
+
+
+figure('units','normalized','outerposition',[0 0 1 1]) % Maximize plot window
+
+% Figure 1
+subplot(3,3,1)
+plot(x(1:n),y(1:n)); 
+xlim([0 inf]);
+ylim([0 inf]);
+xlabel({'Range (m)'});
+ylabel({'Altitude (m)'});
+title({'Trajectory'});
+
+% Figure 2
+subplot(3,3,2)
+plot(t(1:n),Vx(1:n));
+xlabel({'Time (s)'});
+ylabel({'Vx (m/s)'});
+title({'Vertical Velocity'});
+
+% Figure 3
+subplot(3,3,3)
+plot(t(1:n),Mass(1:n));
+xlabel({'Time (s)'});
+ylabel({'Mass (kg)'});
+title({'Rocket mass'});
+
+% Figure 4
+subplot(3,3,4)
+plot(t(1:n),Theta(1:n));
+xlabel({'Time (s)'});
+ylabel({'Theta (Deg)'});
+title({'Theta'});
+
+% Figure 5
+subplot(3,3,7)
+plot(t(1:n),Thrust(1:n));
+xlim([0 0.8]);
+xlabel({'Time (s)'});
+ylabel({'Thrust (N)'});
+title({'Thrust'});
+
+% Figure 6
+subplot(3,3,8)
+plot(t(1:n),Drag(1:n));
+xlabel({'Time (s)'});
+ylabel({'Drag (N)'});
+title({'Drag Force'});
+
+% Figure 7
+subplot(3,3,9)
+plot(Distance(1:n),Fn(1:n));
+xlim([0 2]);
+xlabel({'Distance (m)'});
+ylabel({'Normal Force (N)'});
+title({'Normal Force'});
+
+% Figure 8
+subplot(3,3,9)
+plot(Distance_x(1:n),Rho(1:n));
+xlim([0 2]);
+xlabel({'Height (m)'});
+ylabel({'Density (kg/m^3)'});
+title({'Air density'});
