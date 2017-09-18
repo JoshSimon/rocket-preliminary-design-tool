@@ -42,7 +42,7 @@ clear, clc      % Clear command window and workspace
 
 % Simulation parameters
 Delta = 0.01;                  % Time step 
-Memory_Allocation = 1000000;    % Maximum number of time steps expected
+Memory_Allocation = 10000;    % Maximum number of time steps expected
 
 % Preallocate memory for arrays
 t = zeros(1, Memory_Allocation);
@@ -123,6 +123,7 @@ while y(n) > 0 && n < Memory_Allocation                  % Run until rocket hits
       stage = 2;
     endif
     
+    
     switch (stage)
      
      case 1 % start phase, stage 1
@@ -131,6 +132,10 @@ while y(n) > 0 && n < Memory_Allocation                  % Run until rocket hits
         if Mass(n) <= ( Mass(n) - Mass_Fuel_One )
           Eject_One = true;
         endif
+        if Mass(n) <= 0
+            Mass(n) = 0;
+            stage = 'abort';
+        endif
      
      case 2 % stage 2
           Thrust(n) = Thrust_Two;                         
@@ -138,8 +143,12 @@ while y(n) > 0 && n < Memory_Allocation                  % Run until rocket hits
           if Mass(n) <= ( Mass(n) - Mass_Fuel_One )
             Eject_Two = true;
           endif
+          if Mass(n) <= 0
+            Mass(n) = 0;
+            stage = 'abort';
+          endif
      
-     otherwise % payload separation
+     otherwise % payload separation or abortion due burnout
         Thrust(n) = 0;
         Mass(n) =  Mass(n-1) - Mass_Motor_And_Structure_Two;
         
@@ -203,50 +212,52 @@ title({'Trajectory'});
 % Figure 2
 subplot(3,3,2)
 plot(t(1:n),Vx(1:n));
-xlabel({'Time (s)'});
+xlabel({'Height (m)'});
 ylabel({'Vx (m/s)'});
 title({'Vertical Velocity'});
 
 % Figure 3
 subplot(3,3,3)
-plot(t(1:n),Mass(1:n));
-xlabel({'Time (s)'});
+plot(x(1:n),Mass(1:n));
+xlabel({'Height (m)'});
 ylabel({'Mass (kg)'});
 title({'Rocket mass'});
 
-% Figure 4
-subplot(3,3,4)
-plot(t(1:n),Theta(1:n));
-xlabel({'Time (s)'});
-ylabel({'Theta (Deg)'});
-title({'Theta'});
 
 % Figure 5
 subplot(3,3,7)
-plot(t(1:n),Thrust(1:n));
+plot(x(1:n),Thrust(1:n));
 xlim([0 0.8]);
-xlabel({'Time (s)'});
+xlabel({'Height (m)'});
 ylabel({'Thrust (N)'});
 title({'Thrust'});
 
+
+% Figure 4
+subplot(3,3,4)
+plot(x(1:n),Theta(1:n));
+xlabel({'Range (m)'});
+ylabel({'Theta (Deg)'});
+title({'Theta'});
+
 % Figure 6
 subplot(3,3,8)
-plot(t(1:n),Drag(1:n));
-xlabel({'Time (s)'});
+plot(x(1:n),Drag(1:n));
+xlabel({'Height (m)'});
 ylabel({'Drag (N)'});
 title({'Drag Force'});
 
 % Figure 7
 subplot(3,3,9)
-plot(Distance(1:n),Fn(1:n));
+plot(x(1:n),Fn(1:n));
 xlim([0 2]);
-xlabel({'Distance (m)'});
+xlabel({'Height (m)'});
 ylabel({'Normal Force (N)'});
 title({'Normal Force'});
 
 % Figure 8
 subplot(3,3,9)
-plot(Distance_x(1:n),Rho(1:n));
+plot(x(1:n),Rho(1:n));
 xlim([0 2]);
 xlabel({'Height (m)'});
 ylabel({'Density (kg/m^3)'});
