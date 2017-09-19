@@ -83,9 +83,9 @@
   Mass_Payload = 300;                     % Mass of Payload (kg)
 
   % Maneuver parameters
-  Theta(1) = 89;                     % Initial angle (deg)
-  DeltaTheta = 2;              % Flying angle (deg/s)
-  Height_Start_Gravity_Turn = 8000;  % Height when the vertical flight is stopped and the rocket is tilted for the gravity turn maneuver (m)
+  Theta(1) = 89;                      % Initial angle (deg)
+  DeltaTheta = 2;                     % Flying angle (deg/s)
+  Height_Start_Gravity_Turn = 5000;   % Height when the vertical flight is stopped and the rocket is tilted for the gravity turn maneuver (m)
   Eject_One = false;       
   Eject_Two = false;
   % Rocket_Tips = false;
@@ -189,8 +189,12 @@
       % | /  
       % |/---> Vx
       if y(n) >= Height_Start_Gravity_Turn  % if y(n) > Height_Start_Gravity_Turn  % if a certain heigth is reached, the rocket is actively tilting
-        Theta(n) = atand(Vy(n)/Vx(n)) - DeltaTheta;    % % Angle defined by velocity vector in degrees    
-        disp('Theta is now turning');disp(atand(Vy(n)/Vx(n)) - DeltaTheta);
+        if stage == 1
+          Theta(n) = atand(Vy(n)/Vx(n)) - DeltaTheta;    % % Angle defined by velocity vector in degrees    
+          %disp('Theta is now turning');disp(atand(Vy(n)/Vx(n)) - DeltaTheta);
+        else
+          Theta(n) = atand(Vy(n)/Vx(n)) - 3*DeltaTheta;
+        endif
       else
         Theta(n) = 89;      
       endif
@@ -208,59 +212,73 @@
 
   figure('units','normalized','outerposition',[0 0 1 1]) % Maximize plot window
 
-  % Figure 1
-  subplot(3,3,1)
-  plot(x(1:n),y(1:n)); 
-  xlabel({'Range (m)'});
-  ylabel({'Altitude (m)'});
-  title({'Trajectory'});
-
   % Figure 2
-  subplot(3,3,2)
-  plot(y(1:n),Vy(1:n));
+  subplot(3,2,2)
+  plot(t(1:n),y(1:n), "linewidth", 5);
+  set(gca, "linewidth", 4, "fontsize", 30); 
+  xlabel({'Time (s)'});
+  ylabel({'Height (m)'});
+  title({'Trajectory'});
+  ylim([0 500500]);
+  
+  % Figure 6
+  subplot(3,2,6)
+  plot(t(1:n),Mass(1:n), "linewidth", 5);
+  set(gca, "linewidth", 4, "fontsize", 30); 
+  xlabel({'Time (s)'});
+  ylabel({'Mass (kg)'});
+  title({'Rocket mass'});
+  
+  % Figure 3
+  subplot(3,2,3)
+  plot(y(1:n),Vy(1:n), "linewidth", 5);
+  set(gca, "linewidth", 4, "fontsize", 30); 
   xlabel({'Height (m)'});
   ylabel({'Vy (m/s)'});
   title({'Horizontal Velocity'});
 
-  % Figure 3
-  subplot(3,3,3)
-  plot(y(1:n),Vx(1:n));
+  % Figure 5
+  subplot(3,2,5)
+  plot(y(1:n),Vx(1:n), "linewidth", 5);
+  set(gca, "linewidth", 4, "fontsize", 30); 
   xlabel({'Height (m)'});
   ylabel({'Vy (m/s)'});
   title({'Vertical Velocity'});
 
-  % Figure 3
-  subplot(3,3,4)
-  plot(t(1:n),Mass(1:n));
-  xlabel({'Time (s)'});
-  ylabel({'Mass (kg)'});
-  title({'Rocket mass'});
 
-  % Figure 5
-  subplot(3,3,5)
-  plot(y(1:n),Thrust(1:n));
+  % Figure 1
+  subplot(3,2,1)
+  plot(y(1:n),Thrust(1:n), "linewidth", 5);
+  set(gca, "linewidth", 4, "fontsize", 30); 
   xlabel({'Height (m)'});
   ylabel({'Thrust (N)'});
   title({'Thrust' });
 
 
   % Figure 4
-  subplot(3,3,6)
-  plot(y(1:n),Theta(1:n));
-  xlabel({'Height (m)'});
+  subplot(3,2,4)
+  plot(t(1:n),Theta(1:n), "linewidth", 5);
+  set(gca, "linewidth", 4, "fontsize", 30); 
+  xlabel({'Time (s)'});
   ylabel({'Theta (Deg)'});
   title({'Theta'});
 
-  % Figure 6
-  subplot(3,3,7)
-  plot(y(1:n),Drag(1:n));
+  figure('units','normalized','outerposition',[0 0 1 1]) % Maximize plot window
+  
+  
+  subplot(2,1,1)
+  plot(y(1:n),Drag(1:n), "linewidth", 5);
+    set(gca, "linewidth", 4, "fontsize", 30); 
+
   xlabel({'Height (m)'});
   ylabel({'Drag (N)'});
   title({'Drag Force'});
 
-  % Figure 8
-  subplot(3,3,9)
-  plot(y(1:n),Rho(1:n));
+  subplot(2,1,2)
+ 
+  plot(y(1:n),Rho(1:n), "linewidth", 5);
+    set(gca, "linewidth", 4, "fontsize", 30); 
+
   xlabel({'Height (m)'});
   ylabel({'Density (kg/m^3)'});
   title({'Air density'});
