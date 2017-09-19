@@ -72,10 +72,10 @@
   Thrust_Two = 38027.5;                       % Sum of thrust of the second stage ( (kg*m)/s^2 )
 
   % Rocket parameters
-  r = 1.5;                                 % Rocket fuselage radius (m)
+  r = 1.5;                                % Rocket fuselage radius (m)
   A = 2*pi*r^2;                           % Rocket projected attack area (m^2)
   Launch_Rod_Length = 1;                  % Length of launch rod (m)
-  Mass_Motor_And_Strucutre_One = 999 ;    % Mass of the first stage rocket motor (kg)
+  Mass_Motor_And_Structure_One = 999;     % Mass of the first stage rocket motor (kg)
   Mass_Motor_And_Structure_Two = 1151;    % Mass of the second stage rocket motor (kg)
   Mass_Start = 19301;                     % Start mass of the rocket (kg)
   Mass_Fuel_One = 17001;                  % Fuel mass of the first stage (kg)
@@ -84,7 +84,7 @@
 
   % Maneuver parameters
   Theta(1) = 89;                     % Initial angle (deg)
-  DeltaTheta = 0.00001;              % Flying angle (deg/s)
+  DeltaTheta = 2;              % Flying angle (deg/s)
   Height_Start_Gravity_Turn = 8000;  % Height when the vertical flight is stopped and the rocket is tilted for the gravity turn maneuver (m)
   Eject_One = false;       
   Eject_Two = false;
@@ -136,14 +136,14 @@
     disp('Mass');disp(Mass(n) - Mass_Flow(n));
     
     % Seperation logic
-    if Mass(n) <= (Mass_Start - Mass_Fuel_One) && Seperation_One == false;     % seperation condition first stage
+    if Mass(n) < (Mass_Start - Mass_Fuel_One) && Seperation_One == false;     % seperation condition first stage
       disp('Seperation first stage');
       Seperation_One = true;
       stage = 2;
-      Mass(n) = Mass(n) - Mass_Motor_And_Strucutre_One;
+      Mass(n) = Mass(n) - 999;
     endif
 
-    if Mass(n) <= (Mass_Payload + Mass_Motor_And_Structure_Two) && Seperation_Two == false % seperation condition second stage
+    if Mass(n) < (Mass_Start - (Mass_Fuel_One+Mass_Motor_And_Structure_One+Mass_Fuel_Two)) && Seperation_Two == false % seperation condition second stage
       disp('Seperation second stage');
       Seperation_Two = true;
       stage = 3;
@@ -161,6 +161,11 @@
       % Sum of forces calculations 
       Fx(n)= Thrust(n)*cosd(Theta(n-1))-Drag(n)*cosd(Theta(n-1));                     % Sum x forces
       Fy(n)= Thrust(n)*sind(Theta(n-1))-(Mass(n)*Gravity)- Drag(n)*sind(Theta(n-1));  % Sum y forces
+      if(stage != 1 && stage != 2) 
+        Fx(n) = 0;
+        Fy(n) = 0;
+      endif
+    
     
       % Acceleration calculation
       Ax(n)= Fx(n)/Mass(n);                       % Net accel in x direction 
@@ -184,11 +189,10 @@
       % | /  
       % |/---> Vx
       if y(n) >= Height_Start_Gravity_Turn  % if y(n) > Height_Start_Gravity_Turn  % if a certain heigth is reached, the rocket is actively tilting
-        Theta(n) = atand(Vy(n)/Vx(n));      % % Angle defined by velocity vector in degrees    
-        Theta(n) = Theta(n) - DeltaTheta;
-        disp('Theta is now turning');disp(Theta(n));
+        Theta(n) = atand(Vy(n)/Vx(n)) - DeltaTheta;    % % Angle defined by velocity vector in degrees    
+        disp('Theta is now turning');disp(atand(Vy(n)/Vx(n)) - DeltaTheta);
       else
-        Theta(n)= 89;        
+        Theta(n) = 89;      
       endif
       
       % set the mission goals and end the mission if archieved
