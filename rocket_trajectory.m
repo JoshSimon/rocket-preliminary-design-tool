@@ -65,11 +65,10 @@
   C = 0.4;                                % Drag coefficient
   Gravity = 9.81;                         % Gravity (m/s^2)
 
-  % Mass_Structure = 0.05 * Mass_Start;     % Mass of the strucutre and the motors (kg)
-  Mass_Flow_One = 11*12;                    % Propulsion mass flow of the first stage (kg/s)
-  Mass_Flow_Two = 12;                      % Propulsion mass flow of the second stage (kg/s)
-  Thrust_One = 29898*12;                     % Sum of thrust of the first stage ( (kg*m)/s^2 )
-  Thrust_Two = 38027.5;                       % Sum of thrust of the second stage ( (kg*m)/s^2 )
+  Mass_Flow_One = 11*12;                  % Propulsion mass flow of the first stage (kg/s)
+  Mass_Flow_Two = 12;                     % Propulsion mass flow of the second stage (kg/s)
+  Thrust_One = 29898*12;                  % Sum of thrust of the first stage ( (kg*m)/s^2 )
+  Thrust_Two = 38027.5;                   % Sum of thrust of the second stage ( (kg*m)/s^2 )
 
   % Rocket parameters
   r = 1.5;                                % Rocket fuselage radius (m)
@@ -83,9 +82,9 @@
   Mass_Payload = 300;                     % Mass of Payload (kg)
 
   % Maneuver parameters
-  Theta(1) = 89;                      % Initial angle (deg)
-  DeltaTheta = 2;                     % Flying angle (deg/s)
-  Height_Start_Gravity_Turn = 5000;   % Height when the vertical flight is stopped and the rocket is tilted for the gravity turn maneuver (m)
+  Theta(1) = 89;                          % Initial angle (deg)
+  DeltaTheta = 0;                         % Flying angle (deg/s)
+  Height_Start_Gravity_Turn = 20000;      % Height when the vertical flight is stopped and the rocket is tilted for the gravity turn maneuver (m)
   Eject_One = false;       
   Eject_Two = false;
   % Rocket_Tips = false;
@@ -111,22 +110,22 @@
   clc % clean the console
 
   while y(n) > 0  && Mission_Success == false      % Run until rocket hits the ground or mission completed
-      disp('Mass');disp(Mass(n));
+     
       n = n+1;                    % Increment time step
       t(n)= (n-1)*Delta;          % Elapsed time     
       
     % Determine rocket thrust and mass based on launch phase 
     if (stage == 1)
-      disp('Stage 1 active');
+      %disp('Stage 1 active');
       Thrust(n) = Thrust_One;
       Mass_Flow(n) = Mass_Flow_One * Delta;
-      disp([Thrust(n),Mass_Flow(n)]);
+      %disp([Thrust(n),Mass_Flow(n)]);
     else
       if(stage == 2)
-        disp('Stage 2 active');
+        %disp('Stage 2 active');
         Thrust(n) = Thrust_Two;
         Mass_Flow(n) = Mass_Flow_Two * Delta; 
-        disp([Thrust(n),Mass_Flow(n)]);
+        %disp([Thrust(n),Mass_Flow(n)]);
       else
         Thrust(n)=0; 
       endif
@@ -161,10 +160,10 @@
       % Sum of forces calculations 
       Fx(n)= Thrust(n)*cosd(Theta(n-1))-Drag(n)*cosd(Theta(n-1));                     % Sum x forces
       Fy(n)= Thrust(n)*sind(Theta(n-1))-(Mass(n)*Gravity)- Drag(n)*sind(Theta(n-1));  % Sum y forces
-      if(stage != 1 && stage != 2) 
-        Fx(n) = 0;
-        Fy(n) = 0;
-      endif
+      %if(stage != 1 && stage != 2) 
+      %  Fx(n) = 0;
+      %  Fy(n) = 0;
+      %endif
     
     
       % Acceleration calculation
@@ -190,22 +189,24 @@
       % |/---> Vx
       if y(n) >= Height_Start_Gravity_Turn  % if y(n) > Height_Start_Gravity_Turn  % if a certain heigth is reached, the rocket is actively tilting
         if stage == 1
-          Theta(n) = atand(Vy(n)/Vx(n)) - DeltaTheta;    % % Angle defined by velocity vector in degrees    
+          Theta(n) = atand(Vy(n)/Vx(n)) - DeltaTheta*(n/100);    % % Angle defined by velocity vector in degrees    
           %disp('Theta is now turning');disp(atand(Vy(n)/Vx(n)) - DeltaTheta);
         else
-          Theta(n) = atand(Vy(n)/Vx(n)) - 3*DeltaTheta;
+          Theta(n) = atand(Vy(n)/Vx(n)) - 2*DeltaTheta*(n/100);
         endif
       else
-        Theta(n) = 89;      
+        Theta(n) = 89;  
+        
       endif
+      disp('HERE');disp(Theta(n));disp(n);
       
       % set the mission goals and end the mission if archieved
       if y(n) > 500000
         Mission_Success = true;
-        disp('Mission success');
+        %disp('Mission success');
       endif
 
-       disp('Fy');disp(Fy(n));
+       %disp('Fy');disp(Fy(n));
       
   end
 
@@ -268,17 +269,15 @@
   
   subplot(2,1,1)
   plot(y(1:n),Drag(1:n), "linewidth", 5);
-    set(gca, "linewidth", 4, "fontsize", 30); 
-
+  set(gca, "linewidth", 4, "fontsize", 30); 
   xlabel({'Height (m)'});
   ylabel({'Drag (N)'});
   title({'Drag Force'});
 
   subplot(2,1,2)
- 
   plot(y(1:n),Rho(1:n), "linewidth", 5);
-    set(gca, "linewidth", 4, "fontsize", 30); 
-
+  set(gca, "linewidth", 4, "fontsize", 30); 
+  xlim([0 50000]);
   xlabel({'Height (m)'});
   ylabel({'Density (kg/m^3)'});
   title({'Air density'});
