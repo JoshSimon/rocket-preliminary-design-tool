@@ -75,8 +75,8 @@
   Hull_Thickness = 0.05;                  % Thickness of the Hull, length between hull and tank
 
   % Rocket masses
-  Mass_Motor_And_Structure_One = 1500; % Mass of the first stage rocket motor (kg)
-  Mass_Motor_And_Structure_Two = 800;    % Mass of the second stage rocket motor (kg)            
+  Mass_Motor_And_Structure_One = 500; % Mass of the first stage rocket motor (kg)
+  Mass_Motor_And_Structure_Two = 400;    % Mass of the second stage rocket motor (kg)            
   Mass_Fuel_One = 2418.306;               % Fuel mass of the first stage fuel (kg)
   Mass_Oxidizer_One = 14993.49;           % Oxidizer mass of the first stage (kg)
   Mass_Additiv_Fuel_One = 2418.306 * 0.05;   % Mass of the katalytic additive, in this case 5% (kg)
@@ -96,8 +96,8 @@
   % Rocket motor
   Mass_Flow_One = 11*12;                  % Propulsion mass flow of the first stage (kg/s)
   Mass_Flow_Two = 12;                     % Propulsion mass flow of the second stage (kg/s)
-  Thrust_One = 29898*12;                  % Sum of thrust of the first stage ( (kg*m)/s^2 )
-  Thrust_Two = 38027.5;                   % Sum of thrust of the second stage ( (kg*m)/s^2 )
+  Thrust_One = 40000*12;                  % Sum of thrust of the first stage ( (kg*m)/s^2 )
+  Thrust_Two = 500000.5;                   % Sum of thrust of the second stage ( (kg*m)/s^2 )
   
   % Rocket size
   A = 2*pi*r^2;                           % Rocket projected attack area (m^2)
@@ -117,7 +117,7 @@
  
   % Maneuver parameters
   Theta(1) = 89;                          % Initial angle (deg)
-  DeltaTheta = 0;                         % Flying angle (deg/s)
+  DeltaTheta = 5;                         % Flying angle (deg/s)
   Height_Start_Gravity_Turn = 20000;      % Height when the vertical flight is stopped and the rocket is tilted for the gravity turn maneuver (m)
   Eject_One = false;       
   Eject_Two = false;
@@ -228,8 +228,8 @@
           Theta(n) = atand(Vy(n)/Vx(n)) - 2*DeltaTheta*(n/100);
         endif
       else
-        Theta(n) = 89;  
-        
+        Theta(n) = 89; 
+              
       endif
       disp('HERE');disp(Theta(n));disp(n);
       
