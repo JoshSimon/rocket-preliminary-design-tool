@@ -39,12 +39,57 @@ Mass_Flow = zeros(1, Memory_Allocation);  % Mass_Flow = Flow of mass per second 
 % Natural constants
 C = 0.4;                                % Drag coefficient
 Gravity = 9.81;                         % Gravity (m/s^2)
+RHO_NaBH4 = 1.0740 *10^3;               % Density of the additive (kg/m^3), 100%          
+  RHO_Water = 1000;                       % Density of water (kg/m^3)
+  Rho_H202 = (1.0740 * 10^3)*0.95 + 0.05*1000; % Density of Hydrogenperoxide (kg/m^3), with 5% Water
+  Rho_RP1 = 1000*0.95 + 0.05*RHO_NaBH4;   % Density of RP-1 (kg/m^3) with 5% NaBH4 as an additive
+  
+% Rocket parameters
+  r = .75;                                % Rocket fuselage radius (m)
+  Tank_Radius = .7;                                 % Rocket tank radius
+  Hull_Thickness = 0.05;                  % Thickness of the Hull, length between hull and tank
 
-% Mass_Structure = 0.05 * Mass_Start;   % Mass of the strucutre and the motors (kg)
-Mass_Flow_One = 11*12;                  % Propulsion mass flow of the first stage (kg/s)
-Mass_Flow_Two = 12;                     % Propulsion mass flow of the second stage (kg/s)
-Thrust_One = 29898*12;                  % Sum of thrust of the first stage ( (kg*m)/s^2 )
-Thrust_Two = 38027.5;                   % Sum of thrust of the second stage ( (kg*m)/s^2 )
+% Rocket masses
+  Mass_Motor_And_Structure_One = 500; % Mass of the first stage rocket motor (kg)
+  Mass_Motor_And_Structure_Two = 400;    % Mass of the second stage rocket motor (kg)            
+  Mass_Fuel_One = 2418.306;               % Fuel mass of the first stage fuel (kg)
+  Mass_Oxidizer_One = 14993.49;           % Oxidizer mass of the first stage (kg)
+  Mass_Additiv_Fuel_One = 2418.306 * 0.05;   % Mass of the katalytic additive, in this case 5% (kg)
+  Mass_Fuel_Two = 459.9722;               % Fuel mass of the second stage fuel (kg)
+  Mass_Oxidizer_Two = 2851.828;           % Mass of the oxidizer of the second stage (kg)
+  Mass_Payload = 300;                     % Mass of Payload (kg)
+  Mass_Start = Mass_Motor_And_Structure_One... % Start mass of the rocket (kg)
+  + Mass_Motor_And_Structure_Two...
+  + Mass_Fuel_One...
+  + Mass_Oxidizer_One...
+  + Mass_Fuel_Two...
+  + Mass_Oxidizer_Two...
+  + Mass_Payload;
+  Mass_Fuel_And_Oxidizer_One = Mass_Fuel_One + Mass_Oxidizer_One;
+  Mass_Fuel_And_Oxidizer_Two = Mass_Fuel_Two + Mass_Oxidizer_Two;  
+
+% Rocket motor
+  Mass_Flow_One = 11*12;                  % Propulsion mass flow of the first stage (kg/s)
+  Mass_Flow_Two = 12;                     % Propulsion mass flow of the second stage (kg/s)
+  Thrust_One = 40000*12;                  % Sum of thrust of the first stage ( (kg*m)/s^2 )
+  Thrust_Two = 500000.5;                   % Sum of thrust of the second stage ( (kg*m)/s^2 )
+
+% Rocket size
+  A = 2*pi*r^2;                           % Rocket projected attack area (m^2)
+  Volume_Oxidizer_One = Mass_Oxidizer_One / Rho_H202 ;  % Oxidizer volume of the first stage
+  Volume_Fuel_Stage_One = Mass_Fuel_One / Rho_RP1 ;
+  Volume_Oxidizer_Two = Mass_Oxidizer_Two / Rho_H202 ;
+  Volume_Fuel_Stage_Two = Mass_Fuel_Two / Rho_RP1;  
+  Tank_Height_Fuel_One = Volume_Fuel_Stage_One / (pi* Tank_Radius^2);
+  Tank_Height_Oxidizer_One = Volume_Oxidizer_One / (pi * Tank_Radius^2);
+  Tank_Height_Fuel_Two = Volume_Fuel_Stage_Two / (pi* Tank_Radius^2);
+  Tank_Height_Oxidizer_Two = Volume_Oxidizer_Two / (pi * Tank_Radius^2);
+  disp('Rocket dimensions \n');
+  disp('Tank_Height_Fuel_One');disp(Tank_Height_Fuel_One);
+  disp('Tank_Height_Oxidizer_One');disp(Tank_Height_Oxidizer_One);
+  disp('Tank_Height_Fuel_Two');disp(Tank_Height_Fuel_Two);
+  disp('Tank_Height_Oxidizer_Two');disp(Tank_Height_Oxidizer_Two); 
+
 
 % Rocket parameters
 r = 0.95;                               % Rocket fuselage radius (m)
@@ -76,8 +121,8 @@ if method == 1
   Thrust(1) = Thrust_One;               % Inital rocket thrust ( (kg*m)/s^2 )
   Thrust(2) = Thrust_One;               % Inital rocket thrust ( (kg*m)/s^2 )
   Mass_Flow(3) = Mass_Flow_One * Delta; % Inital mass flow equals the mass flow of the first stage times the delta
-  Theta(1) = 89;                        % Initial angle (deg)
-  Theta(2) = 89;                        % Initial angle (deg)
+  Theta(1) = 90;                        % Initial angle (deg)
+  Theta(2) = 90;                        % Initial angle (deg)
   stage = 1;                            % Initial stage (1 for the first one)
 
 else
@@ -135,19 +180,22 @@ while y(n) > 0  && Mission_Success == false      % Run until rocket hits the gro
     endif
   endif
   Mass(n) = Mass(n-1) - Mass_Flow(n);
-  disp('Mass(n)');disp(Mass(n));
+  
   % Seperation logic
-  if Mass(n) <= (Mass_Start - Mass_Fuel_One) && Seperation_One == false     % seperation condition first stage
-    Seperation_One = true;
-    stage = 2;
-    Mass(n) = Mass(n) - Mass_Motor_And_Structure_One;
-  endif
+    if Mass(n) < (Mass_Start - Mass_Fuel_And_Oxidizer_One) && Seperation_One == false;     % seperation condition first stage
+      disp('Seperation first stage');
+      Seperation_One = true;
+      stage = 2;
+      Mass(n) = Mass(n) - 999;
+    endif
 
-  if Mass(n) <= (Mass_Payload + Mass_Motor_And_Structure_Two) && Seperation_Two == false % seperation condition second stage
-    Seperation_Two = true;
-    stage = 3;
-    Mass(n) = Mass_Payload;
-  endif
+    if Mass(n) < (Mass_Start - (Mass_Fuel_And_Oxidizer_One+Mass_Motor_And_Structure_One + Mass_Fuel_And_Oxidizer_Two)) && Seperation_Two == false % seperation condition second stage
+      disp('Seperation second stage');
+      Seperation_Two = true;
+      stage = 3;
+      Mass(n) = Mass_Payload;
+    endif
+
 
    
     % Drag force calculation
@@ -177,6 +225,8 @@ while y(n) > 0  && Mission_Success == false      % Run until rocket hits the gro
       Ay(n) = ( y(n-2) - 2*y(n-1) + y(n) ) / (Delta^2);
 
     else 
+    % simplistic incremental calculations
+
       % Sum of forces calculations 
       Fx(n)= Thrust(n)*cosd(Theta(n-1))-Drag(n)*cosd(Theta(n-1));                     % Sum x forces horizontal
       Fy(n)= Thrust(n)*sind(Theta(n-1))-(Mass(n)*Gravity)- Drag(n)*sind(Theta(n-1));  % Sum y forces veritcal
