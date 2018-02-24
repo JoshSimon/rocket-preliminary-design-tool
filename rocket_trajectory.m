@@ -3,7 +3,7 @@
   % Multi-stage rocket dynamics and trajectory simulation.
   %
   % Description:
-  % Predicts multi-stage rocket dynamics and trajectories based on the given 
+  % Predicts multi-stage rocket dynamics and trajectories based on the given
   % rocket mass, mass flow, engine thrust, launch parameters, and drag coefficient.
   % The drag is related to the ambient air pressure which modelled with the ISA
   % standard atmosphere.
@@ -11,7 +11,7 @@
   clear, clc      % Clear command window and workspace
 
   % Simulation parameters
-  Delta = 1;                      % Incremental step 
+  Delta = 1;                      % Incremental step
   Memory_Allocation = 10000;    % Maximum number of time steps expected
 
   method = 1; %=0                 % Calculation method
@@ -37,13 +37,18 @@
   Mass_Flow = zeros(1, Memory_Allocation);  % Mass_Flow = Flow of mass per second that comes out of the thruster (kg/s)
 
   % Natural constants
+    % fluid (air)
+
+
   C = 0.4;                                % Drag coefficient
   Gravity = 9.81;                         % Gravity (m/s^2)
-  RHO_NaBH4 = 1.0740 *10^3;               % Density of the additive (kg/m^3), 100%          
+  RHO_NaBH4 = 1.0740 *10^3;               % Density of the additive (kg/m^3), 100%
     RHO_Water = 1000;                       % Density of water (kg/m^3)
     Rho_H202 = (1.0740 * 10^3)*0.95 + 0.05*1000; % Density of Hydrogenperoxide (kg/m^3), with 5% Water
     Rho_RP1 = 1000*0.95 + 0.05*RHO_NaBH4;   % Density of RP-1 (kg/m^3) with 5% NaBH4 as an additive
-    
+
+
+
   % Rocket parameters
     r = .75;                                % Rocket fuselage radius (m)
     Tank_Radius = .7;                                 % Rocket tank radius
@@ -51,7 +56,7 @@
 
   % Rocket masses
     Mass_Motor_And_Structure_One = 500; % Mass of the first stage rocket motor (kg)
-    Mass_Motor_And_Structure_Two = 400;    % Mass of the second stage rocket motor (kg)            
+    Mass_Motor_And_Structure_Two = 400;    % Mass of the second stage rocket motor (kg)
     Mass_Fuel_One = 2418.306;               % Fuel mass of the first stage fuel (kg)
     Mass_Oxidizer_One = 14993.49;           % Oxidizer mass of the first stage (kg)
     Mass_Additiv_Fuel_One = 2418.306 * 0.05;   % Mass of the katalytic additive, in this case 5% (kg)
@@ -60,7 +65,7 @@
     Mass_Payload = 300;                     % Mass of Payload (kg)
     Mass_Start = Mass_Motor_And_Structure_One + Mass_Fuel_One + Mass_Oxidizer_One + Mass_Fuel_Two + Mass_Oxidizer_Two + Mass_Payload;
     Mass_Fuel_And_Oxidizer_One = Mass_Fuel_One + Mass_Oxidizer_One;
-    Mass_Fuel_And_Oxidizer_Two = Mass_Fuel_Two + Mass_Oxidizer_Two;  
+    Mass_Fuel_And_Oxidizer_Two = Mass_Fuel_Two + Mass_Oxidizer_Two;
 
   % Rocket motor
     Mass_Flow_One = 11*12;                  % Propulsion mass flow of the first stage (kg/s)
@@ -73,7 +78,7 @@
     Volume_Oxidizer_One = Mass_Oxidizer_One / Rho_H202 ;  % Oxidizer volume of the first stage
     Volume_Fuel_Stage_One = Mass_Fuel_One / Rho_RP1 ;
     Volume_Oxidizer_Two = Mass_Oxidizer_Two / Rho_H202 ;
-    Volume_Fuel_Stage_Two = Mass_Fuel_Two / Rho_RP1;  
+    Volume_Fuel_Stage_Two = Mass_Fuel_Two / Rho_RP1;
     Tank_Height_Fuel_One = Volume_Fuel_Stage_One / (pi* Tank_Radius^2);
     Tank_Height_Oxidizer_One = Volume_Oxidizer_One / (pi * Tank_Radius^2);
     Tank_Height_Fuel_Two = Volume_Fuel_Stage_Two / (pi* Tank_Radius^2);
@@ -82,7 +87,7 @@
     disp('Tank_Height_Fuel_One');disp(Tank_Height_Fuel_One);
     disp('Tank_Height_Oxidizer_One');disp(Tank_Height_Oxidizer_One);
     disp('Tank_Height_Fuel_Two');disp(Tank_Height_Fuel_Two);
-    disp('Tank_Height_Oxidizer_Two');disp(Tank_Height_Oxidizer_Two); 
+    disp('Tank_Height_Oxidizer_Two');disp(Tank_Height_Oxidizer_Two);
 
 
   % Rocket parameters
@@ -130,9 +135,9 @@
     Rho(1) = 1.2;                   % Initial air density (kg/m^3)
     Mass(1) = Mass_Start;           % Initial rocket mass (kg)
     Thrust(1) = Thrust_One;         % Inital rocket thrust ( (kg*m)/s^2 )
-    n = 1;                          % Initial time step            
+    n = 1;                          % Initial time step
     stage = 1;                      % Initial stage (1 for the first one)
-  
+
     Mass(1)=Mass_Start;
     Mass_Flow(1) = Mass_Flow_One * Delta; % Inital mass flow equals the mass flow of the first stage times the delta
     Theta(1) = 89;                     % Initial angle (deg)
@@ -147,14 +152,14 @@
   Mission_Success = false;
 
   while y(n) > 0  && Mission_Success == false      % Run until rocket hits the ground or mission completed
-      
+
       n = n+1;                    % Increment time step
-      t(n)= (n-1)*Delta;          % Elapsed time, starts with n=1 * Delta     
+      t(n)= (n-1)*Delta;          % Elapsed time, starts with n=1 * Delta
 
       disp('N');disp(n);
 
-     
-      % Determine rocket thrust and mass based on launch phase 
+
+      % Determine rocket thrust and mass based on launch phase
     if (stage == 1)
       disp('Stage 1 active');
       Thrust(n) = Thrust_One;
@@ -165,16 +170,16 @@
         disp('Stage 2 active');
         Thrust(n) = Thrust_Two;
         MassFlow(n) = Mass_Flow_Two * Delta;
-        k = n + Coasting_Phase_After_Stage_One;      
+        k = n + Coasting_Phase_After_Stage_One;
 
       else
-        Thrust(n)=0; 
+        Thrust(n)=0;
       endif
     endif
     Mass(n) = Mass(n-1) - Mass_Flow(n);
-     
+
      disp(Mass(n));
-    
+
     % Seperation logic
       if Mass(n) < (Mass_Start - Mass_Fuel_And_Oxidizer_One) && Seperation_One == false;     % seperation condition first stage
         disp('Seperation first stage');
@@ -194,19 +199,54 @@
       disp(Mass(n));
 
 
-     
-      % Drag force calculation
-      % C - Drag coefficient, related to the velocity?
-      % Rho - Air density
-      % A - Refernce area
+
+      % Drag force calculation, only within noticable atmosphere
+      if(y(n-1)<30000){
+        % C - Drag coefficient, related to the velocity
+
+          % A - Cross sectional area facing the ongoing fluid stream
+
+          A = 
+
+          % Laminar / Turbular stream settlement logic
+
+            % Re - Reynolds number
+              % Rho - Air density
+              % V - overall velocity
+                V = sqrt(Vx(n-1)^2 + Vy(n-1)^2)
+              % L - rocket length
+              % T - temperature
+              T = isa(y(n-1),"T")
+              % dynVisc - viscosity of the fluid (air)
+                dynVisc = dynamicViscosity(T)
+
+              Re = (Rho * V * L) / visc
+
+
+            % ReTrans - Turbulent transition Reynolds number
+            if(Re < ReTrans){
+              % laminar fluid stream
+            } else {
+              % turbulent fluid stream
+            }
+
+
+      }
+
+
+
+
+
+
+
       % (Vx(n-1)^2+Vy(n-1)^2) - absolute velocity squared
       % Drag(n)= 0.5*C*Rho(n-1)*A*(Vx(n-1)^2+Vy(n-1)^2); % Calculate drag force
-      
+
       if method == 1
         % Finite difference methode
           % basics:
-          % Ax(n) = (Thrus(n)*cosd(Theta(n-1))-Drag(n)*cosd(Theta(n-1))) / Mass(n) ; comes out of the physical model & F = m * a 
-          % Ax(n) = ( x(n) - 2*x(n-1) + x(n-2) ) / ( t(n)^2 ); out of the definition of differntial equation second order
+          % Ax(n) = (Thrus(n)*cosd(Theta(n-1))-Drag(n)*cosd(Theta(n-1))) / Mass(n) ; comes out of the physical model & F = m * a
+          % Ax(n) = ( x(n) - 2*x(n-1) + x(n-2) ) / ( t(n)^2 ); out of the definition of differential equation second order
           % see https://en.wikipedia.org/wiki/Finite_difference_method
 
         % Position of the rocket
@@ -217,19 +257,19 @@
         % Velocity of the rocket
         Vx(n) = (x(n) - x(n-1)) / Delta;
         Vy(n) = (y(n) - y(n-1)) / Delta;
-        
+
         % Accleration
         Ax(n) = ( x(n-2) - 2*x(n-1) + x(n) ) / (Delta^2);
         Ay(n) = ( y(n-2) - 2*y(n-1) + y(n) ) / (Delta^2);
 
       % simplistic incremental calculations
 
-        % Sum of forces calculations 
+        % Sum of forces calculations
         Fx(n)= Thrust(n)*cosd(Theta(n-1))-Drag(n)*cosd(Theta(n-1));                     % Sum x forces horizontal
         Fy(n)= Thrust(n)*sind(Theta(n-1))-(Mass(n)*Gravity)- Drag(n)*sind(Theta(n-1));  % Sum y forces veritcal
-    
+
         % Acceleration calculation
-        Ax(n)= Fx(n)/Mass(n);                       % Net accel in x direction 
+        Ax(n)= Fx(n)/Mass(n);                       % Net accel in x direction
         Ay(n)= Fy(n)/Mass(n);                       % Net accel in y direction
 
         % Velocity calculations
@@ -238,30 +278,30 @@
 
         % Position calculations
         x(n)= x(n-1)+Vx(n)*Delta;                   % Position in x direction
-        y(n)= y(n-1)+Vy(n)*Delta;                   % Position in y direction   
-      
+        y(n)= y(n-1)+Vy(n)*Delta;                   % Position in y direction
+
       endif
-      
+
       % Air pressure calculation with ISA model
-      %Rho(n) = isa(y(n),"R");   
-      
+      %Rho(n) = isa(y(n),"R");
+
       % Rocket angle calculation
       % ^ Vy
-      % |   / 
+      % |   /
       % |  / angle in between velocity vector and x-direction
-      % | /  
+      % | /
       % |/---> Vx
      if y(n) >= Height_Start_Gravity_Turn  % if y(n) > Height_Start_Gravity_Turn  % if a certain heigth is reached, the rocket is actively tilting
-       Theta(n) = atand(Vy(n)/Vx(n)) - DeltaTheta;  % Angle defined by velocity vector in degrees    
-     else 
-      Theta(n)= 89;        
+       Theta(n) = atand(Vy(n)/Vx(n)) - DeltaTheta;  % Angle defined by velocity vector in degrees
+     else
+      Theta(n)= 89;
      endif
-     
+
       % set the mission goals and end the mission if archieved
       if y(n) > 500000 || Theta(n) <= 5
         Mission_Success = true;
       endif
-      
+
   end
 
 
@@ -271,24 +311,24 @@
     % Figure 2
     subplot(3,2,2)
     plot(t(1:n),y(1:n), "linewidth", 5);
-    set(gca, "linewidth", 4, "fontsize", 30); 
+    set(gca, "linewidth", 4, "fontsize", 30);
     xlabel({'Time (s)'});
     ylabel({'Height (m)'});
     title({'Trajectory'});
     %ylim([0 500500]);
-  
+
     % Figure 6
     subplot(3,2,6)
     plot(t(1:n),Mass(1:n), "linewidth", 5);
-    set(gca, "linewidth", 4, "fontsize", 30); 
+    set(gca, "linewidth", 4, "fontsize", 30);
     xlabel({'Time (s)'});
     ylabel({'Mass (kg)'});
     title({'Rocket mass'});
-    
+
     % Figure 3
     subplot(3,2,3)
     plot(y(1:n),Vy(1:n), "linewidth", 5);
-    set(gca, "linewidth", 4, "fontsize", 30); 
+    set(gca, "linewidth", 4, "fontsize", 30);
     xlabel({'Height (m)'});
     ylabel({'Vy (m/s)'});
     title({'Horizontal Velocity'});
@@ -296,7 +336,7 @@
     % Figure 5
     subplot(3,2,5)
     plot(y(1:n),Vx(1:n), "linewidth", 5);
-    set(gca, "linewidth", 4, "fontsize", 30); 
+    set(gca, "linewidth", 4, "fontsize", 30);
     xlabel({'Height (m)'});
     ylabel({'Vy (m/s)'});
     title({'Vertical Velocity'});
@@ -305,7 +345,7 @@
     % Figure 1
     subplot(3,2,1)
     plot(y(1:n),Thrust(1:n), "linewidth", 5);
-    set(gca, "linewidth", 4, "fontsize", 30); 
+    set(gca, "linewidth", 4, "fontsize", 30);
     xlabel({'Height (m)'});
     ylabel({'Thrust (N)'});
     title({'Thrust' });
@@ -314,26 +354,25 @@
     % Figure 4
     subplot(3,2,4)
     plot(t(1:n),Theta(1:n), "linewidth", 5);
-    set(gca, "linewidth", 4, "fontsize", 30); 
+    set(gca, "linewidth", 4, "fontsize", 30);
     xlabel({'Time (s)'});
     ylabel({'Theta (Deg)'});
     title({'Theta'});
 
     figure('units','normalized','outerposition',[0 0 1 1]) % Maximize plot window
-    
-    
+
+
     subplot(2,1,1)
     plot(y(1:n),Drag(1:n), "linewidth", 5);
-    set(gca, "linewidth", 4, "fontsize", 30); 
+    set(gca, "linewidth", 4, "fontsize", 30);
     xlabel({'Height (m)'});
     ylabel({'Drag (N)'});
     title({'Drag Force'});
 
     subplot(2,1,2)
     plot(y(1:n),Rho(1:n), "linewidth", 5);
-    set(gca, "linewidth", 4, "fontsize", 30); 
+    set(gca, "linewidth", 4, "fontsize", 30);
     xlim([0 50000]);
     xlabel({'Height (m)'});
     ylabel({'Density (kg/m^3)'});
     title({'Air density'});
-
