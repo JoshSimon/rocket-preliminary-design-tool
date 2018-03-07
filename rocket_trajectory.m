@@ -91,9 +91,17 @@
 
 
   % Rocket parameters
-  r = 0.95;                               % Rocket fuselage radius (m)
-  A = 2*pi*r^2;                           % Rocket projected attack area (m^2)
-  Launch_Rod_Length = 1;                  % Length of launch rod (m)
+    % Rocket dimensions
+      r = 0.95;                               % Rocket fuselage radius (m)
+      
+      
+      A = 2*pi*r^2;                           % Rocket projected attack area (m^2)
+    
+    
+    % Rocket masses
+    
+    % Rocket performance
+  
   Mass_Motor_And_Structure_One = 999;     % Mass of the first stage rocket motor (kg)
   Mass_Motor_And_Structure_Two = 1151;    % Mass of the second stage rocket motor (kg)
   Mass_Start = 19301;                     % Start mass of the rocket (kg)
@@ -101,12 +109,17 @@
   Mass_Fuel_Two = 1201;                   % Fuel mass of the second stage (kg)
   Mass_Payload = 300;                     % Mass of Payload (kg)
 
+    % other 
+    Launch_Rod_Length = 1;                  % Length of launch rod (m)
+
+  
+  
   % Maneuver parameters
   DeltaTheta = 7;                         % Flying angle change per incremental step (deg/s)
   Height_Start_Gravity_Turn = 5000;       % Height when the vertical flight is stopped and the rocket is tilted for the gravity turn maneuver (m)
   Coasting_Phase_After_Stage_One = 5;     % Coasting phase after stage one in (s)
 
-  % Inital param  eters
+  % Inital parameters
   if method == 1
     n=2;
     x(1)=0;
@@ -150,6 +163,69 @@
 
 
   Mission_Success = false;
+  
+  % static calculations related to the rocket dimensions
+  
+  % Areas
+  
+    % A_fin - cross sectional area of a single fin
+    
+    if fins.shape === "clipped delta"
+    
+    %  rectangle in between
+    %        |
+    %     ___V___ 
+    %    /|    | / <- triangle back
+    %   / |    |/
+    %  /__|____/ 
+    %   ^ 
+    %   |
+    % triangle in front
+    
+    
+    %
+    %     /                             /
+    %    /                             /
+    %   /  sweep angle front          /  sweep angle back
+    %  /______                  _____/ _  _  _ 
+    %
+    
+    
+    nose.sweep_angle_front
+    nose.sweep_angle_back
+        
+    A_triangle_in_front = 
+    A_triangle_back = 
+    A_rectangle_in_between = 
+    
+    endif
+  
+    % A_nose_cross_sectional - cross sectional area of the nose (looking from the side)
+    
+    if nose === "segment parabola" 
+      % nose contour linspace points
+        points_over_length = (linspace(0,nose.length,nose.length)
+      % nose contour
+        nose.contour = r * ( ( 2*points_over_length / nose.length)   -nose.segment*(power(points_over_length / nose.length,2)) )   /(2-nose.segment)); 
+      % nose contour integral   
+        A_nose_cross_sectional = quadl(nose.contour)      
+    endif      
+    
+    % A_body_cross_sectional - cross sectional area of the body (looking from the side)
+      A_body_cross_sectional = 2r * rocket.length - nose.length
+      
+    % A_fins_cross_sectional - cross sectional area of the fins (looking from the side)
+    
+    if fins.quantity === 4
+      A
+    endif 
+    
+    % A_body_surface - surface area of the body
+      A_body_surface = 2 * PI * r * rocket.length - nose.length
+    
+    
+  A_nose_cross_sectional + A_body_cross_sectional + A_fins_cross_sectional
+  
 
   while y(n) > 0  && Mission_Success == false      % Run until rocket hits the ground or mission completed
 
@@ -205,8 +281,9 @@
         % C - Drag coefficient, related to the velocity
 
           % A - Cross sectional area facing the ongoing fluid stream
+          % A_surface - complete surface area of the rocket
 
-          A = 
+          A = A_nose_cross_sectional + A_body_cross_sectional + A_fin_cross_sectional
 
           % Laminar / Turbular stream settlement logic
 
@@ -215,8 +292,9 @@
               % V - overall velocity
                 V = sqrt(Vx(n-1)^2 + Vy(n-1)^2)
               % L - rocket length
+              % d - rocket diameter
               % T - temperature
-              T = isa(y(n-1),"T")
+                T = isa(y(n-1),"T")
               % dynVisc - viscosity of the fluid (air)
                 dynVisc = dynamicViscosity(T)
 
@@ -226,6 +304,14 @@
             % ReTrans - Turbulent transition Reynolds number
             if(Re < ReTrans){
               % laminar fluid stream
+                % D_skin - skin friction drag
+
+                % nose & body drag
+                  C_nose&body = 1.02 * D_skin * (1 + ( 1.5 / ( L / d ) ^ ( 3 / 2 ) ) )
+
+
+
+
             } else {
               % turbulent fluid stream
             }
